@@ -2,8 +2,10 @@ package brass
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"os"
+	"os/exec"
 	"path/filepath"
 )
 
@@ -12,19 +14,23 @@ type API struct {
 	SrcDir  string
 }
 
-func (api *API) types() []Type {
+func (api *API) types() []*Type {
 	path := filepath.Join(api.SrcDir, "types")
 	entries, _ := os.ReadDir(path)
-	types := []Type{}
+	types := []*Type{}
 	for _, e := range entries {
 		id := e.Name()
-		path := filepath.Join(path, id)
-		b, _ := os.ReadFile(path)
-		var t Type
-		json.Unmarshal(b, &t)
-		types = append(types, t)
+		types = append(types, api.typ(id))
 	}
 	return types
+}
+
+func (api *API) typ(id string) *Type {
+	t := &Type{}
+	path := filepath.Join(api.SrcDir, "types", id)
+	b, _ := os.ReadFile(path)
+	json.Unmarshal(b, t)
+	return t
 }
 
 func (api *API) tables() []string {
@@ -44,6 +50,47 @@ func (api *API) rows(tableID string) []string {
 		rows = append(rows, id)
 	}
 	return rows
+}
+
+// mutator returns the path of the executable used in POST, PUT, PATCH and DELETE requests.
+func (api *API) mutator(typeID string) string {
+	// mkdir {datadir}/cmd/{typeID}
+	cmdPath := filepath.Join(api.DataDir, "cmd", typeID)
+	err := os.MkdirAll(cmdPath, os.ModePerm)
+	if err != nil {
+		panic(err)
+	}
+
+	// go mod init
+	cmd := exec.Command("go", "mod", "init", typeID)
+	cmd.Dir = cmdPath
+	cmd.Env = os.Environ()
+	b, err := cmd.CombinedOutput()
+	if err != nil {
+		fmt.Println(string(b))
+		panic(err)
+	}
+
+	// generate main.go
+	t := api.typ(typeID)
+	mainGo := t.mutatorCmd()
+	err = os.WriteFile(filepath.Join(cmdPath, "main.go"), []byte(mainGo), os.ModePerm)
+	if err != nil {
+		panic(err)
+	}
+
+	// go build -o binpath main.go
+	binPath := filepath.Join(api.DataDir, "bin", typeID)
+	cmd = exec.Command("go", "build", "-o", binPath, "main.go")
+	cmd.Dir = cmdPath
+	cmd.Env = os.Environ()
+	b, err = cmd.CombinedOutput()
+	if err != nil {
+		fmt.Println(string(b))
+		panic(err)
+	}
+
+	return binPath
 }
 
 func (api *API) ServeHTTP(w http.ResponseWriter, r *http.Request) {

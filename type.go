@@ -6,3 +6,5 @@ type Type struct {
 	Name       english.Name
 	PluralName english.Name
 }
+
+func (t *Type) mutatorCmd() string

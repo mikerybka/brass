@@ -1,0 +1,4 @@
+github.com/mikerybka/pkg v0.0.0-20241112182344-1eebe33e8f4c h1:fOjEDumi+u4plOGuYwCSykToYjO+nffJFJmAKxm1Ne8=
+github.com/mikerybka/pkg v0.0.0-20241112182344-1eebe33e8f4c/go.mod h1:W9tpsdgxx8kLR+ckE2FTBE1hjoKFQW82eRKb6k3Ea98=
+golang.org/x/text v0.18.0 h1:XvMDiNzPAl0jr17s6W9lcaIhGUfUORdGCNsuLmPG224=
+golang.org/x/text v0.18.0/go.mod h1:BuEKDfySbSR4drPmRPG/7iBdf8hvFMuRexcpahXilzY=

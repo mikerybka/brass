@@ -30,13 +30,13 @@ func (api *API) types() []Type {
 func (api *API) tables() []string {
 	tables := []string{}
 	for _, t := range api.types() {
-		tables = append(tables, t.PluralName)
+		tables = append(tables, t.PluralName.ID())
 	}
 	return tables
 }
 
-func (api *API) rows(table string) []string {
-	path := filepath.Join(api.DataDir, table)
+func (api *API) rows(tableID string) []string {
+	path := filepath.Join(api.DataDir, tableID)
 	entries, _ := os.ReadDir(path)
 	rows := []string{}
 	for _, e := range entries {
@@ -55,15 +55,17 @@ func (api *API) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			panic(err)
 		}
+		b = append(b, '\n')
 		w.Write(b)
 	})
 
 	// List rows
-	mux.HandleFunc("GET /{table}", func(w http.ResponseWriter, r *http.Request) {
-		b, err := json.MarshalIndent(api.rows(r.PathValue("table")), "", "  ")
+	mux.HandleFunc("GET /{tableID}", func(w http.ResponseWriter, r *http.Request) {
+		b, err := json.MarshalIndent(api.rows(r.PathValue("tableID")), "", "  ")
 		if err != nil {
 			panic(err)
 		}
+		b = append(b, '\n')
 		w.Write(b)
 	})
 

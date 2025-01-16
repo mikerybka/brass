@@ -1,6 +1,8 @@
 package brass
 
+import "github.com/mikerybka/pkg/english"
+
 type Type struct {
-	Name       string
-	PluralName string
+	Name       english.Name
+	PluralName english.Name
 }

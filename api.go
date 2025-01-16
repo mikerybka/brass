@@ -2,11 +2,11 @@ package brass
 
 import "net/http"
 
-type App struct {
+type API struct {
 	DataDir string
 	SrcDir  string
 }
 
-func (app *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (api *API) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("ok\n"))
 }

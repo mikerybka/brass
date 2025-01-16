@@ -69,5 +69,18 @@ func (api *API) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		w.Write(b)
 	})
 
+	// Fetch row
+	mux.HandleFunc("GET /{tableID}/{rowID}", func(w http.ResponseWriter, r *http.Request) {})
+
+	// Create row
+	mux.HandleFunc("POST /{tableID}", func(w http.ResponseWriter, r *http.Request) {})
+
+	// Update row
+	mux.HandleFunc("PUT /{tableID}/{rowID}", func(w http.ResponseWriter, r *http.Request) {})
+	mux.HandleFunc("PATCH /{tableID}/{rowID}", func(w http.ResponseWriter, r *http.Request) {})
+
+	// Delete row
+	mux.HandleFunc("DELETE /{tableID}/{rowID}", func(w http.ResponseWriter, r *http.Request) {})
+
 	mux.ServeHTTP(w, r)
 }

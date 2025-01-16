@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 
@@ -22,5 +23,5 @@ func main() {
 		DataDir: requireEnvVar("SRC_DIR"),
 		SrcDir:  requireEnvVar("DATA_DIR"),
 	}
-	http.ListenAndServe(":3000", api)
+	log.Fatal(http.ListenAndServe(":"+requireEnvVar("PORT"), api))
 }

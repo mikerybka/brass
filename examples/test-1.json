@@ -1,0 +1,7 @@
+{
+    "Name": ["Test", "1"],
+    "BaseType": {
+        "From": "github.com/mikerybka/test",
+        "Name": "TypeA"
+    }
+}

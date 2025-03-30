@@ -5,7 +5,11 @@ import (
 )
 
 type Type struct {
-	Name       english.Name
-	PluralName english.Name
-	Fields     []Field
+	Name             english.Name
+	PluralName       english.Name
+	IsArray          bool
+	IsMap            bool
+	UnderlyingTypeID string
+	IsStruct         bool
+	Fields           []Field
 }

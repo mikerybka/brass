@@ -3,101 +3,85 @@ package brass
 import (
 	"encoding/json"
 	"net/http"
-	"os"
+	"net/http/httputil"
+	"net/url"
 	"path/filepath"
+	"strings"
+
+	"github.com/mikerybka/util"
 )
 
+func NewAPI(dir string) *API {
+	api := &API{
+		authManager: NewManager[*Auth](filepath.Join(dir, "auth.json")),
+		metaManager: NewManager[*Metadata](filepath.Join(dir, "meta.json")),
+	}
+	return api
+}
+
 type API struct {
-	DataDir string
-	SrcDir  string
-}
-
-func (api *API) types() []*Type {
-	path := filepath.Join(api.SrcDir, "types")
-	entries, _ := os.ReadDir(path)
-	types := []*Type{}
-	for _, e := range entries {
-		id := e.Name()
-		types = append(types, api.typ(id))
-	}
-	return types
-}
-
-func (api *API) typ(id string) *Type {
-	t := &Type{}
-	path := filepath.Join(api.SrcDir, "types", id)
-	b, _ := os.ReadFile(path)
-	json.Unmarshal(b, t)
-	return t
-}
-
-func (api *API) tables() []string {
-	path := filepath.Join(api.SrcDir, "types")
-	entries, _ := os.ReadDir(path)
-	tables := []string{}
-	for _, e := range entries {
-		id := e.Name()
-		tables = append(tables, id)
-	}
-	return tables
-}
-
-func (api *API) rows(tableID string) []string {
-	path := filepath.Join(api.DataDir, tableID)
-	entries, _ := os.ReadDir(path)
-	rows := []string{}
-	for _, e := range entries {
-		id := e.Name()
-		rows = append(rows, id)
-	}
-	return rows
+	authManager *Manager[*Auth]
+	metaManager *Manager[*Metadata]
 }
 
 func (api *API) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	mux := http.NewServeMux()
+	mux.HandleFunc("/auth/join", api.join)
+	mux.HandleFunc("/auth/login", api.login)
+	mux.HandleFunc("/auth/logout", api.logout)
+	mux.HandleFunc("/auth/change-password", api.changePassword)
+	mux.HandleFunc("/auth/delete-account", api.deleteAccount)
+	mux.Handle("/meta", api.metaManager.Get())
+	mux.HandleFunc("/data/{owner}/", func(w http.ResponseWriter, r *http.Request) {
+		// Authenticate
+		userID := api.authManager.Get().GetUserID(r)
 
-	// List tables
-	mux.HandleFunc("GET /{$}", func(w http.ResponseWriter, r *http.Request) {
-		b, err := json.MarshalIndent(api.tables(), "", "  ")
-		if err != nil {
-			panic(err)
+		// Authorize
+		owner := r.PathValue("owner")
+		if owner != userID { // TODO: set up user groups
+			w.WriteHeader(http.StatusUnauthorized)
+			return
 		}
-		b = append(b, '\n')
-		w.Write(b)
+
+		// Proxy request to database
+		host := strings.TrimPrefix(r.Host, "api.")
+		_, id, _ := util.PopPath(r.URL.Path)
+		httputil.NewSingleHostReverseProxy(&url.URL{
+			Scheme: "http",
+			Host:   "localhost:4000",
+			Path:   host + id,
+		}).ServeHTTP(w, r)
 	})
-
-	// List rows
-	mux.HandleFunc("GET /{tableID}", func(w http.ResponseWriter, r *http.Request) {
-		b, err := json.MarshalIndent(api.rows(r.PathValue("tableID")), "", "  ")
-		if err != nil {
-			panic(err)
-		}
-		b = append(b, '\n')
-		w.Write(b)
-	})
-
-	// Fetch row
-	mux.HandleFunc("GET /{tableID}/{rowID}", func(w http.ResponseWriter, r *http.Request) {})
-
-	// Create row
-	mux.HandleFunc("POST /{tableID}", func(w http.ResponseWriter, r *http.Request) {
-		panic("todo")
-	})
-
-	// Set row
-	mux.HandleFunc("PUT /{tableID}/{rowID}", func(w http.ResponseWriter, r *http.Request) {
-		panic("todo")
-	})
-
-	// Update row
-	mux.HandleFunc("PATCH /{tableID}/{rowID}", func(w http.ResponseWriter, r *http.Request) {
-		panic("todo")
-	})
-
-	// Delete row
-	mux.HandleFunc("DELETE /{tableID}/{rowID}", func(w http.ResponseWriter, r *http.Request) {
-		panic("todo")
-	})
-
 	mux.ServeHTTP(w, r)
 }
+
+func (a *API) join(w http.ResponseWriter, r *http.Request) {
+	req := &struct {
+		Username        string
+		Password        string
+		ConfirmPassword string
+	}{}
+	err := json.NewDecoder(r.Body).Decode(req)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	auth := a.authManager.Get()
+	token, err := auth.Join(req.Username, req.Password, req.ConfirmPassword)
+	a.authManager.Set(auth)
+
+	res := &struct {
+		SessionToken string
+		Error        error
+	}{
+		SessionToken: token,
+		Error:        err,
+	}
+	json.NewEncoder(w).Encode(res)
+}
+
+func (a *API) login(w http.ResponseWriter, r *http.Request)          {}
+func (a *API) logout(w http.ResponseWriter, r *http.Request)         {}
+func (a *API) changePassword(w http.ResponseWriter, r *http.Request) {}
+func (a *API) deleteAccount(w http.ResponseWriter, r *http.Request)  {}

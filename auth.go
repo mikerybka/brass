@@ -40,7 +40,7 @@ func (a *Auth) Join(username, password, confirmPassword string) (string, error) 
 		return "", err
 	}
 
-	sessionToken := util.RandomToken(32)
+	sessionToken := util.RandomToken(16)
 	user := User{
 		ID:           username,
 		PasswordHash: string(hashedPassword),

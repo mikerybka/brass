@@ -5,11 +5,11 @@ import (
 )
 
 type Type struct {
-	Name             *english.Name
-	PluralName       *english.Name
-	IsArray          bool
-	IsMap            bool
-	UnderlyingTypeID string
-	IsStruct         bool
-	Fields           []Field
+	Name             *english.Name `json:"name"`
+	PluralName       *english.Name `json:"pluralName"`
+	IsArray          bool          `json:"isArray"`
+	IsMap            bool          `json:"isMap"`
+	UnderlyingTypeID string        `json:"underlyingTypeID"`
+	IsStruct         bool          `json:"isStruct"`
+	Fields           []Field       `json:"fields"`
 }

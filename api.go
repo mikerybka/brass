@@ -27,6 +27,14 @@ type API struct {
 }
 
 func (api *API) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
+	w.Header().Set("Access-Control-Allow-Headers", "UserID, Token")
+	if r.Method == http.MethodOptions {
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
+
 	mux := http.NewServeMux()
 	mux.HandleFunc("/auth/join", api.join)
 	mux.HandleFunc("/auth/login", api.login)

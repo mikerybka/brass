@@ -2,9 +2,9 @@ package brass
 
 import (
 	"encoding/json"
+	"fmt"
+	"io"
 	"net/http"
-	"net/http/httputil"
-	"net/url"
 	"path/filepath"
 
 	"github.com/mikerybka/constants"
@@ -55,11 +55,22 @@ func (api *API) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 		// Proxy request to database
 		_, id, _ := util.PopPath(r.URL.Path)
-		httputil.NewSingleHostReverseProxy(&url.URL{
-			Scheme: "http",
-			Host:   "localhost:4000",
-			Path:   api.appHost + id,
-		}).ServeHTTP(w, r)
+		path := api.appHost + id
+		req, err := http.NewRequest(r.Method, fmt.Sprintf("http://localhost:4000/%s", path), r.Body)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		res, err := http.DefaultClient.Do(req)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.WriteHeader(res.StatusCode)
+		_, err = io.Copy(w, res.Body)
+		if err != nil {
+			panic(err)
+		}
 	})
 	mux.ServeHTTP(w, r)
 }

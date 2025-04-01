@@ -5,8 +5,8 @@ import (
 )
 
 type Type struct {
-	Name             english.Name
-	PluralName       english.Name
+	Name             *english.Name
+	PluralName       *english.Name
 	IsArray          bool
 	IsMap            bool
 	UnderlyingTypeID string

@@ -19,7 +19,7 @@ func (auth *Auth) GetUserID(r *http.Request) string {
 		return "public"
 	}
 
-	sessionID := r.Header.Get("SessionID")
+	sessionID := r.Header.Get("Token")
 	if !user.Sessions[sessionID] {
 		return "public"
 	}

@@ -6,20 +6,22 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"path/filepath"
-	"strings"
 
+	"github.com/mikerybka/constants"
 	"github.com/mikerybka/util"
 )
 
-func NewAPI(dir string) *API {
+func NewAPI(appHost string) *API {
 	api := &API{
-		authManager: NewManager[*Auth](filepath.Join(dir, "auth.json")),
-		metaManager: NewManager[*Metadata](filepath.Join(dir, "meta.json")),
+		appHost:     appHost,
+		authManager: NewManager[*Auth](filepath.Join(constants.DataDir, appHost, "auth.json")),
+		metaManager: NewManager[*Metadata](filepath.Join(constants.DataDir, appHost, "meta.json")),
 	}
 	return api
 }
 
 type API struct {
+	appHost     string
 	authManager *Manager[*Auth]
 	metaManager *Manager[*Metadata]
 }
@@ -44,12 +46,11 @@ func (api *API) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Proxy request to database
-		host := strings.TrimPrefix(r.Host, "api.")
 		_, id, _ := util.PopPath(r.URL.Path)
 		httputil.NewSingleHostReverseProxy(&url.URL{
 			Scheme: "http",
 			Host:   "localhost:4000",
-			Path:   host + id,
+			Path:   api.appHost + id,
 		}).ServeHTTP(w, r)
 	})
 	mux.ServeHTTP(w, r)

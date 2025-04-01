@@ -28,6 +28,9 @@ func (auth *Auth) GetUserID(r *http.Request) string {
 }
 
 func (a *Auth) Join(username, password, confirmPassword string) (string, error) {
+	if _, ok := UsernameBlocklist[username]; ok {
+		return "", fmt.Errorf("username blocked")
+	}
 	if _, ok := a.Users[username]; ok {
 		return "", fmt.Errorf("username taken")
 	}

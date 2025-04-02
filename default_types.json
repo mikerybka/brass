@@ -1,0 +1,247 @@
+{
+  "field": {
+    "name": {
+      "words": [
+        "Field"
+      ]
+    },
+    "pluralName": {
+      "words": [
+        "Fields"
+      ]
+    },
+    "isArray": false,
+    "isMap": false,
+    "underlyingTypeID": "",
+    "isStruct": true,
+    "fields": [
+      {
+        "name": {
+          "words": [
+            "Name"
+          ]
+        },
+        "typeID": "name",
+        "idArray": false,
+        "isMap": false
+      },
+      {
+        "name": {
+          "words": [
+            "Type",
+            "ID"
+          ]
+        },
+        "typeID": "string",
+        "idArray": false,
+        "isMap": false
+      },
+      {
+        "name": {
+          "words": [
+            "Is",
+            "Array"
+          ]
+        },
+        "typeID": "bool",
+        "idArray": false,
+        "isMap": false
+      },
+      {
+        "name": {
+          "words": [
+            "Is",
+            "Map"
+          ]
+        },
+        "typeID": "bool",
+        "idArray": false,
+        "isMap": false
+      }
+    ]
+  },
+  "library": {
+    "name": {
+      "words": [
+        "Library"
+      ]
+    },
+    "pluralName": {
+      "words": [
+        "Libraries"
+      ]
+    },
+    "isArray": false,
+    "isMap": false,
+    "underlyingTypeID": "",
+    "isStruct": true,
+    "fields": [
+      {
+        "name": {
+          "words": [
+            "Types"
+          ]
+        },
+        "typeID": "type",
+        "idArray": false,
+        "isMap": true
+      }
+    ]
+  },
+  "name": {
+    "name": {
+      "words": [
+        "Name"
+      ]
+    },
+    "pluralName": {
+      "words": [
+        "Names"
+      ]
+    },
+    "isArray": false,
+    "isMap": false,
+    "underlyingTypeID": "",
+    "isStruct": true,
+    "fields": [
+      {
+        "name": {
+          "words": [
+            "Words"
+          ]
+        },
+        "typeID": "word",
+        "idArray": true,
+        "isMap": false
+      }
+    ]
+  },
+  "org": {
+    "name": {
+      "words": [
+        "Org"
+      ]
+    },
+    "pluralName": {
+      "words": [
+        "Orgs"
+      ]
+    },
+    "isArray": false,
+    "isMap": true,
+    "underlyingTypeID": "library",
+    "isStruct": false,
+    "fields": null
+  },
+  "type": {
+    "name": {
+      "words": [
+        "Type"
+      ]
+    },
+    "pluralName": {
+      "words": [
+        "Types"
+      ]
+    },
+    "isArray": false,
+    "isMap": false,
+    "underlyingTypeID": "",
+    "isStruct": true,
+    "fields": [
+      {
+        "name": {
+          "words": [
+            "Name"
+          ]
+        },
+        "typeID": "name",
+        "idArray": false,
+        "isMap": false
+      },
+      {
+        "name": {
+          "words": [
+            "Plural",
+            "Name"
+          ]
+        },
+        "typeID": "name",
+        "idArray": false,
+        "isMap": false
+      },
+      {
+        "name": {
+          "words": [
+            "Is",
+            "Array"
+          ]
+        },
+        "typeID": "bool",
+        "idArray": false,
+        "isMap": false
+      },
+      {
+        "name": {
+          "words": [
+            "Is",
+            "Map"
+          ]
+        },
+        "typeID": "bool",
+        "idArray": false,
+        "isMap": false
+      },
+      {
+        "name": {
+          "words": [
+            "Underlying",
+            "Type",
+            "ID"
+          ]
+        },
+        "typeID": "string",
+        "idArray": false,
+        "isMap": false
+      },
+      {
+        "name": {
+          "words": [
+            "Is",
+            "Struct"
+          ]
+        },
+        "typeID": "bool",
+        "idArray": false,
+        "isMap": false
+      },
+      {
+        "name": {
+          "words": [
+            "Fields"
+          ]
+        },
+        "typeID": "field",
+        "idArray": true,
+        "isMap": false
+      }
+    ]
+  },
+  "word": {
+    "name": {
+      "words": [
+        "Word"
+      ]
+    },
+    "pluralName": {
+      "words": [
+        "Words"
+      ]
+    },
+    "isArray": false,
+    "isMap": false,
+    "underlyingTypeID": "string",
+    "isStruct": false,
+    "fields": null
+  }
+}

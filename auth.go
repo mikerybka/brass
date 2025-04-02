@@ -59,3 +59,22 @@ func (a *Auth) Join(username, password, confirmPassword string) (string, error) 
 
 	return sessionToken, nil
 }
+
+func (a *Auth) Login(username, password string) (string, error) {
+	user, ok := a.Users[username]
+	if !ok {
+		return "", fmt.Errorf("no user")
+	}
+	err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password))
+	if err != nil {
+		return "", err
+	}
+
+	token := util.RandomToken(16)
+	if user.Sessions == nil {
+		user.Sessions = map[string]bool{}
+	}
+	user.Sessions[token] = true
+
+	return token, nil
+}

@@ -77,9 +77,9 @@ func (api *API) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func (a *API) join(w http.ResponseWriter, r *http.Request) {
 	req := &struct {
-		Username        string
-		Password        string
-		ConfirmPassword string
+		Username        string `json:"username"`
+		Password        string `json:"password"`
+		ConfirmPassword string `json:"confirmPassword"`
 	}{}
 	err := json.NewDecoder(r.Body).Decode(req)
 	if err != nil {
@@ -92,16 +92,40 @@ func (a *API) join(w http.ResponseWriter, r *http.Request) {
 	a.authManager.Set(auth)
 
 	res := &struct {
-		SessionToken string
-		Error        error
+		Token string `json:"token"`
+		Error error  `json:"error"`
 	}{
-		SessionToken: token,
-		Error:        err,
+		Token: token,
+		Error: err,
 	}
 	json.NewEncoder(w).Encode(res)
 }
 
-func (a *API) login(w http.ResponseWriter, r *http.Request)          {}
+func (a *API) login(w http.ResponseWriter, r *http.Request) {
+	req := &struct {
+		Username string `json:"username"`
+		Password string `json:"password"`
+	}{}
+	err := json.NewDecoder(r.Body).Decode(req)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	auth := a.authManager.Get()
+	token, err := auth.Login(req.Username, req.Password)
+	a.authManager.Set(auth)
+
+	res := &struct {
+		Token string `json:"token"`
+		Error error  `json:"error"`
+	}{
+		Token: token,
+		Error: err,
+	}
+	json.NewEncoder(w).Encode(res)
+}
+
 func (a *API) logout(w http.ResponseWriter, r *http.Request)         {}
 func (a *API) changePassword(w http.ResponseWriter, r *http.Request) {}
 func (a *API) deleteAccount(w http.ResponseWriter, r *http.Request)  {}

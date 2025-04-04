@@ -6,10 +6,11 @@ import (
 
 type Type struct {
 	Name             *english.Name `json:"name"`
-	PluralName       *english.Name `json:"pluralName"`
-	IsArray          bool          `json:"isArray"`
-	IsMap            bool          `json:"isMap"`
-	UnderlyingTypeID string        `json:"underlyingTypeID"`
-	IsStruct         bool          `json:"isStruct"`
-	Fields           []Field       `json:"fields"`
+	PluralName       *english.Name `json:"plural_name"`
+	IsArray          bool          `json:"is_array"`
+	IsMap            bool          `json:"is_map"`
+	UnderlyingTypeID string        `json:"underlying_type_id"`
+	IsStruct         bool          `json:"is_struct"`
+	Fields           []*Field      `json:"fields"`
+	HTMLTemplate     string        `json:"html_template"`
 }

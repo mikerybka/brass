@@ -36,7 +36,7 @@ func main() {
 }
 
 func startServer(port string) {
-	s := brass.NewServer()
+	s := brass.NewServer(util.EnvVar("WORKDIR", "."))
 	http.ListenAndServe(":"+port, s)
 }
 

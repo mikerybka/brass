@@ -42,7 +42,7 @@ func ReadType(path ...string) (*Type, error) {
 		return nil, err
 	}
 
-	t.HTMLTemplate, err = ReadString(p, "template.html")
+	t.HTMLTemplate, err = ReadString(p, "html_template")
 	if err != nil {
 		return nil, err
 	}

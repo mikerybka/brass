@@ -16,7 +16,7 @@ func genMeta() *brass.Metadata {
 			Name:       english.NewName("Root"),
 			PluralName: english.NewName("Roots"),
 			IsStruct:   true,
-			Fields: []brass.Field{
+			Fields: []*brass.Field{
 				{
 					Name:   english.NewName("Title"),
 					TypeID: "string",

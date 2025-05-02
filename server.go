@@ -6,20 +6,24 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/mikerybka/util"
 )
 
-func NewServer(dir string) http.Handler {
-	return &Server{dir}
-}
-
 type Server struct {
-	Dir string
+	Dir  string
+	Apps map[string]App
 }
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	serve(s.meta(), s.Dir, w, r)
+	if strings.HasPrefix("www.", r.Host) {
+		app := s.Apps[strings.TrimPrefix("www.", r.Host)]
+		app.ServeHTTP(w, r)
+		return
+	}
+	app := s.Apps[r.Host]
+	app.ServeHTTP(w, r)
 }
 
 func serve(meta *Metadata, dir string, w http.ResponseWriter, r *http.Request) {

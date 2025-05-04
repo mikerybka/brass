@@ -11,6 +11,6 @@ type Type struct {
 	IsMap            bool          `json:"is_map"`
 	UnderlyingTypeID string        `json:"underlying_type_id"`
 	IsStruct         bool          `json:"is_struct"`
-	Fields           []*Field      `json:"fields"`
+	Fields           []Field       `json:"fields"`
 	HTMLTemplate     string        `json:"html_template"`
 }

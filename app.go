@@ -25,11 +25,7 @@ func (a *App) GenerateSourceCode(dir string) error {
 }
 
 func (a *App) generateTypes() error
-func (a *App) generateAPI() error
-func (a *App) generateAdmin() error
-func (a *App) generateHome() error
-func (a *App) generateLandingPage() error
-func (a *App) generateContactPage() error
+func (a *App) generateServer() error
+func (a *App) generateTemplates() error
 func (a *App) generateFavicon() error
-func (a *App) generateMainCmd() error
 func (a *App) generateDockerfile() error

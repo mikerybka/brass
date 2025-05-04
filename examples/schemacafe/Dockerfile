@@ -27,7 +27,6 @@ ENV PATH=$GOROOT/bin:$PATH
 # Build app
 WORKDIR /root/schemacafe
 COPY . .
-RUN go mod tidy
 RUN go build -o /bin/server cmd/server/main.go
 
 # Copy to fresh image

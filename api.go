@@ -2,13 +2,10 @@ package brass
 
 import (
 	"encoding/json"
-	"fmt"
-	"io"
 	"net/http"
 	"path/filepath"
 
 	"github.com/mikerybka/constants"
-	"github.com/mikerybka/util"
 )
 
 func NewAPI(appHost string) *API {
@@ -42,36 +39,36 @@ func (api *API) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	mux.HandleFunc("/auth/change-password", api.changePassword)
 	mux.HandleFunc("/auth/delete-account", api.deleteAccount)
 	mux.Handle("/meta", api.metaManager.Get())
-	mux.HandleFunc("/data/{owner}/", func(w http.ResponseWriter, r *http.Request) {
-		// Authenticate
-		userID := api.authManager.Get().GetUserID(r)
+	// mux.HandleFunc("/data/{owner}/", func(w http.ResponseWriter, r *http.Request) {
+	// 	// Authenticate
+	// 	userID := api.authManager.Get().GetUserID(r)
 
-		// Authorize
-		owner := r.PathValue("owner")
-		if owner != userID { // TODO: set up user groups
-			w.WriteHeader(http.StatusUnauthorized)
-			return
-		}
+	// 	// Authorize
+	// 	owner := r.PathValue("owner")
+	// 	if owner != userID { // TODO: set up user groups
+	// 		w.WriteHeader(http.StatusUnauthorized)
+	// 		return
+	// 	}
 
-		// Proxy request to database
-		_, id, _ := util.PopPath(r.URL.Path)
-		path := api.appHost + id
-		req, err := http.NewRequest(r.Method, fmt.Sprintf("http://localhost:4000/%s", path), r.Body)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		res, err := http.DefaultClient.Do(req)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		w.WriteHeader(res.StatusCode)
-		_, err = io.Copy(w, res.Body)
-		if err != nil {
-			panic(err)
-		}
-	})
+	// 	// Proxy request to database
+	// 	_, id, _ := util.PopPath(r.URL.Path)
+	// 	path := api.appHost + id
+	// 	req, err := http.NewRequest(r.Method, fmt.Sprintf("http://localhost:4000/%s", path), r.Body)
+	// 	if err != nil {
+	// 		http.Error(w, err.Error(), http.StatusInternalServerError)
+	// 		return
+	// 	}
+	// 	res, err := http.DefaultClient.Do(req)
+	// 	if err != nil {
+	// 		http.Error(w, err.Error(), http.StatusInternalServerError)
+	// 		return
+	// 	}
+	// 	w.WriteHeader(res.StatusCode)
+	// 	_, err = io.Copy(w, res.Body)
+	// 	if err != nil {
+	// 		panic(err)
+	// 	}
+	// })
 	mux.ServeHTTP(w, r)
 }
 

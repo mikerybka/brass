@@ -1,80 +1,109 @@
 package brass
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
+	"os"
+	"path/filepath"
 
 	"github.com/mikerybka/util"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type Auth struct {
-	Users map[string]User
+	DataDir string
 }
 
-func (auth *Auth) GetUserID(r *http.Request) string {
-	userID := r.Header.Get("UserID")
-	user, ok := auth.Users[userID]
-	if !ok {
-		return "public"
+func (auth *Auth) user(id string) (*User, bool, error) {
+	path := filepath.Join(auth.DataDir, "users", id)
+	b, err := os.ReadFile(path)
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return nil, false, nil
+		} else {
+			return nil, false, err
+		}
 	}
+	user := &User{}
+	err = json.Unmarshal(b, user)
+	if err != nil {
+		panic(err)
+	}
+	return user, true, nil
+}
 
+func (auth *Auth) GetUserID(r *http.Request) (string, error) {
+	userID := r.Header.Get("UserID")
+	user, ok, err := auth.user(userID)
+	if !ok {
+		return "", err
+	}
 	sessionID := r.Header.Get("Token")
 	if !user.Sessions[sessionID] {
-		return "public"
+		return "", nil
 	}
-
-	return userID
+	return userID, nil
 }
 
 func (a *Auth) Join(username, password, confirmPassword string) (string, error) {
 	if _, ok := UsernameBlocklist[username]; ok {
 		return "", fmt.Errorf("username blocked")
 	}
-	if _, ok := a.Users[username]; ok {
+	_, ok, err := a.user(username)
+	if err != nil {
+		return "", err
+	}
+	if ok {
 		return "", fmt.Errorf("username taken")
 	}
 	if password != confirmPassword {
 		return "", fmt.Errorf("passwords don't match")
 	}
-
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return "", err
 	}
-
 	sessionToken := util.RandomToken(16)
-	user := User{
+	user := &User{
 		ID:           username,
 		PasswordHash: string(hashedPassword),
 		Sessions: map[string]bool{
 			sessionToken: true,
 		},
 	}
-
-	if a.Users == nil {
-		a.Users = map[string]User{}
-	}
-	a.Users[username] = user
-
-	return sessionToken, nil
-}
-
-func (a *Auth) Login(username, password string) (string, error) {
-	user, ok := a.Users[username]
-	if !ok {
-		return "", fmt.Errorf("no user")
-	}
-	err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password))
+	err = a.saveUser(username, user)
 	if err != nil {
 		return "", err
 	}
+	return sessionToken, nil
+}
 
+func (a *Auth) saveUser(id string, u *User) error {
+	path := filepath.Join(a.DataDir, "users", id)
+	return util.WriteJSONFile(path, u)
+}
+
+func (a *Auth) Login(username, password string) (string, error) {
+	user, ok, err := a.user(username)
+	if err != nil {
+		return "", err
+	}
+	if !ok {
+		return "", fmt.Errorf("no user")
+	}
+	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password))
+	if err != nil {
+		return "", err
+	}
 	token := util.RandomToken(16)
 	if user.Sessions == nil {
 		user.Sessions = map[string]bool{}
 	}
-	user.Sessions[token] = true
-
+	err = a.saveUser(username, user)
+	if err != nil {
+		return "", err
+	}
 	return token, nil
 }

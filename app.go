@@ -36,7 +36,15 @@ func (a *App) GenerateSourceCode(dir string) error {
 			return fmt.Errorf("%d: %s", i, err)
 		}
 	}
-	return nil
+	cmd := exec.Command("go", "fmt", "./...")
+	cmd.Dir = dir
+	err = cmd.Run()
+	if err != nil {
+		return err
+	}
+	cmd = exec.Command("go", "mod", "tidy")
+	cmd.Dir = dir
+	return cmd.Run()
 }
 
 func (a *App) generateGoMod(dir string) error {
@@ -133,6 +141,7 @@ func (a *App) generateType(dir string, t Type) error {
 	panic("bad type: no kind")
 }
 func (a *App) generateServer(dir string) error
+func (a *App) generateServerCmd(dir string) error
 func (a *App) generateClient(dir string) error
 func (a *App) generateFrontend(dir string) error
 func (a *App) generateFavicon(dir string) error

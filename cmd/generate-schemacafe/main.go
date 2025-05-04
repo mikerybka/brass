@@ -11,13 +11,17 @@ import (
 //go:embed icon.png
 var icon []byte
 
+//go:embed root.html.tmpl
+var rootTemplate string
+
 func main() {
 	dir := "examples/schemacafe"
 	app := &brass.App{
-		Repo:     "github.com/mikerybka/schemacafe",
-		Name:     "Schema.cafe",
-		Icon:     icon,
-		CoreType: "schema",
+		Repo:         "github.com/mikerybka/schemacafe",
+		Name:         "Schema.cafe",
+		Icon:         icon,
+		RootTemplate: rootTemplate,
+		CoreType:     "schema",
 		Types: map[string]brass.Type{
 			"schema": {
 				Name:       english.NewName("Schema"),

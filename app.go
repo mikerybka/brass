@@ -1,20 +1,23 @@
 package brass
 
 import (
+	_ "embed"
 	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"text/template"
 
 	"github.com/mikerybka/util"
 )
 
 type App struct {
-	Repo     string
-	Name     string
-	Icon     []byte // 1024x1024 pixel .png file
-	CoreType string
-	Types    map[string]Type
+	Repo         string
+	Name         string
+	Icon         []byte // 1024x1024 pixel .png file
+	RootTemplate string
+	CoreType     string
+	Types        map[string]Type
 }
 
 func (a *App) GenerateSourceCode(dir string) error {
@@ -29,6 +32,7 @@ func (a *App) GenerateSourceCode(dir string) error {
 		func() error { return a.generateClient(dir) },
 		func() error { return a.generateFrontend(dir) },
 		func() error { return a.generateFavicon(dir) },
+		func() error { return a.generateRootHTML(dir) },
 		func() error { return a.generateDockerfile(dir) },
 	})
 	for i, err := range errs {
@@ -162,10 +166,34 @@ func (a *App) generateType(dir string, t Type) error {
 	}
 	panic("bad type: no kind")
 }
-func (a *App) generateServer(dir string) error { return nil }
 
-func (a *App) generateServerCmd(dir string) error  { return nil }
-func (a *App) generateClient(dir string) error     { return nil }
-func (a *App) generateFrontend(dir string) error   { return nil }
-func (a *App) generateFavicon(dir string) error    { return nil }
+//go:embed server.go.tmpl
+var serverGoTmpl string
+
+func (a *App) generateServer(dir string) error {
+	path := filepath.Join(dir, "server.go")
+	f, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	return template.Must(template.New("server.go").Parse(serverGoTmpl)).Execute(f, struct {
+		PkgName string
+	}{
+		PkgName: filepath.Base(dir),
+	})
+}
+
+func (a *App) generateRootHTML(dir string) error {
+	path := filepath.Join(dir, "root.html")
+	return os.WriteFile(path, []byte(a.RootTemplate), os.ModePerm)
+}
+func (a *App) generateServerCmd(dir string) error { return nil }
+func (a *App) generateClient(dir string) error    { return nil }
+func (a *App) generateFrontend(dir string) error  { return nil }
+func (a *App) generateFavicon(dir string) error {
+	// favicon.ico
+	// favicon.go
+	return nil
+}
 func (a *App) generateDockerfile(dir string) error { return nil }

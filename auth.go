@@ -35,12 +35,12 @@ func (auth *Auth) user(id string) (*User, bool, error) {
 }
 
 func (auth *Auth) GetUserID(r *http.Request) (string, error) {
-	userID := r.Header.Get("UserID")
+	userID := util.Cookie(r, "UserID")
 	user, ok, err := auth.user(userID)
 	if !ok {
 		return "", err
 	}
-	sessionID := r.Header.Get("Token")
+	sessionID := util.Cookie(r, "SessionID")
 	if !user.Sessions[sessionID] {
 		return "", nil
 	}
@@ -77,6 +77,10 @@ func (a *Auth) Join(username, password, confirmPassword string) (string, error) 
 	if err != nil {
 		return "", err
 	}
+	err = util.Touch(filepath.Join(a.DataDir, "orgs", user.ID, "members", user.ID))
+	if err != nil {
+		return "", err
+	}
 	return sessionToken, nil
 }
 
@@ -101,9 +105,29 @@ func (a *Auth) Login(username, password string) (string, error) {
 	if user.Sessions == nil {
 		user.Sessions = map[string]bool{}
 	}
+	user.Sessions[token] = true
 	err = a.saveUser(username, user)
 	if err != nil {
 		return "", err
 	}
 	return token, nil
+}
+
+func (a *Auth) Allowed(r *http.Request) (bool, error) {
+	orgID := r.PathValue("orgID")
+	if orgID == "" {
+		return true, nil
+	}
+	userID, err := a.GetUserID(r)
+	if err != nil {
+		return false, err
+	}
+	_, err = os.Stat(filepath.Join(a.DataDir, "orgs", orgID, "members", userID))
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return false, nil
+		}
+		return false, err
+	}
+	return true, nil
 }

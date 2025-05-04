@@ -162,7 +162,8 @@ func (a *App) generateType(dir string, t Type) error {
 	}
 	panic("bad type: no kind")
 }
-func (a *App) generateServer(dir string) error     { return nil }
+func (a *App) generateServer(dir string) error { return nil }
+
 func (a *App) generateServerCmd(dir string) error  { return nil }
 func (a *App) generateClient(dir string) error     { return nil }
 func (a *App) generateFrontend(dir string) error   { return nil }

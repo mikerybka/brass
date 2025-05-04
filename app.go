@@ -38,19 +38,29 @@ func (a *App) GenerateSourceCode(dir string) error {
 	}
 	cmd := exec.Command("go", "fmt", "./...")
 	cmd.Dir = dir
-	err = cmd.Run()
+	out, err := cmd.CombinedOutput()
 	if err != nil {
-		return err
+		return fmt.Errorf("go fmt: %s: %s", err, out)
 	}
 	cmd = exec.Command("go", "mod", "tidy")
 	cmd.Dir = dir
-	return cmd.Run()
+	out, err = cmd.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("go mod tidy: %s: %s", err, out)
+	}
+	return nil
 }
 
 func (a *App) generateGoMod(dir string) error {
+	os.Remove(filepath.Join(dir, "go.mod"))
+	os.Remove(filepath.Join(dir, "go.sum"))
 	cmd := exec.Command("go", "mod", "init", a.Repo)
 	cmd.Dir = dir
-	return cmd.Run()
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("%s: %s", err, out)
+	}
+	return nil
 }
 
 func (a *App) generateTypes(dir string) (err error) {
@@ -127,7 +137,19 @@ func (a *App) generateType(dir string, t Type) error {
 					return err
 				}
 			}
-			_, err = fmt.Fprintf(f, "%s `json:\"%s\"`", field.TypeID, field.Name.SnakeCase())
+			if isBuiltinType(field.TypeID) {
+				_, err = fmt.Fprintf(f, "%s", field.TypeID)
+				if err != nil {
+					return err
+				}
+			} else {
+				typ := a.Types[field.TypeID]
+				_, err = fmt.Fprintf(f, "%s", typ.Name.PascalCase())
+				if err != nil {
+					return err
+				}
+			}
+			_, err = fmt.Fprintf(f, " `json:\"%s\"`\n", field.Name.SnakeCase())
 			if err != nil {
 				return err
 			}
@@ -140,9 +162,9 @@ func (a *App) generateType(dir string, t Type) error {
 	}
 	panic("bad type: no kind")
 }
-func (a *App) generateServer(dir string) error
-func (a *App) generateServerCmd(dir string) error
-func (a *App) generateClient(dir string) error
-func (a *App) generateFrontend(dir string) error
-func (a *App) generateFavicon(dir string) error
-func (a *App) generateDockerfile(dir string) error
+func (a *App) generateServer(dir string) error     { return nil }
+func (a *App) generateServerCmd(dir string) error  { return nil }
+func (a *App) generateClient(dir string) error     { return nil }
+func (a *App) generateFrontend(dir string) error   { return nil }
+func (a *App) generateFavicon(dir string) error    { return nil }
+func (a *App) generateDockerfile(dir string) error { return nil }

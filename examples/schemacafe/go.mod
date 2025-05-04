@@ -3,7 +3,7 @@ module github.com/mikerybka/schemacafe
 go 1.24.2
 
 require (
-	github.com/mikerybka/brass v0.0.0-20250504134412-33b97ba68d1d
+	github.com/mikerybka/brass v0.0.0-20250504142709-87ddd732cab3
 	github.com/mikerybka/util v0.0.0-20250504134858-7a38cbfd5b03
 )
 
